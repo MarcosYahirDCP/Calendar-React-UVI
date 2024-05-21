@@ -1,0 +1,84 @@
+.event-panel {
+    display: flex;
+    flex-direction: column;
+    height: 100%; 
+    width: 100%;
+    background: #18529d;
+    padding: 5%;
+    padding-right: 0;
+    color: #fff;
+    font-family: 'Gill Sans MT';
+    font-weight: 600;
+    font-size: larger;
+    box-sizing: border-box; /* Para que el padding no afecte el tamaño total */
+}
+
+#selected_date {
+    width: 100%;
+    text-align: start;
+}
+
+#registered_events{
+    width: 100%;
+    text-align: center;
+}
+.events_container {
+    display: flex;
+    flex-direction: column;
+    align-content: center;
+    align-items: center;
+    justify-content: center;
+    flex-grow: 1; /* Hace que ocupe todo el espacio disponible */
+
+}
+#btn_new_event{
+    background-color: #28AD56;
+    border: none;
+    padding: 10px;
+    font-family:'Gill Sans MT';
+    font-size: 18pt;
+    color: #fff;
+    margin-left: 25%;
+    margin-right: 25%;
+}
+#registered_events{
+    margin-top: 25pt;
+    font-size: 30pt;
+}
+#btn_new_event:hover{
+    background-color: #3dcc6f;
+    transform: scale(1.1);
+}
+.loading-screen{
+    margin-top: 34px;
+    color: #18529d;
+    text-align: center;
+    font-weight: 600;
+    font-family:'Gill Sans MT';
+}
+.success-message{
+    margin-top: 34px;
+    color: #18529d;
+    text-align: center;
+    font-weight: 600;
+    font-family:'Gill Sans MT';
+}
+.card-container{
+    width: 100%;
+    padding-top: 5%;
+    max-height: 70vh; /* Establece una altura máxima para el contenedor */
+    overflow-y: auto;
+}
+.event-card{
+    background: linear-gradient(80deg, #28AD56, transparent);
+    width: 100%;
+    height: auto;
+    text-align: start;
+    padding: 25px;
+    margin-bottom: 25px;
+    cursor: pointer;
+
+}
+.event-card:hover{
+    background-color: #3dcc6f;
+}
