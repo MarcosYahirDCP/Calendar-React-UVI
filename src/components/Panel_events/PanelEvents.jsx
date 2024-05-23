@@ -9,14 +9,14 @@ const EventPanel = ({ isOpen, selectedDate, selectedDate2, eventosEnFechaSelecci
     const [modalOpen, setModalOpen] = useState(false);
     const [numPonentes, setNumPonentes] = useState(1);
     const [isChecked, setIsChecked] = useState({
-        pantallas: false,
-        tripie: false,
-        microfonos: false,
-        proyectores: false,
-        bocina: false,
+        Pantallas: false,
+        Tripie: false,
+        Micrófonos: false,
+        Proyectores: false,
+        Bocina: false,
         equipoVideoconferencia: false,
-        extension: false,
-        laptop: false
+        Extension: false,
+        Laptop: false
     });
     const [eventData, setEventData] = useState({
         eventName: '',
@@ -144,14 +144,14 @@ const EventPanel = ({ isOpen, selectedDate, selectedDate2, eventosEnFechaSelecci
                     <div>
                         <label id='options'>De los siguientes servicios selecciona los que necesites:</label>
                         <div className="checklist">
-                            <div><input type="checkbox" id="screen" name="pantallas" value="Pantallas" checked={isChecked.screen} onChange={handleCheckboxChange} /> Pantallas</div>
-                            <div><input type="checkbox" id="tripie" name="tripie" value="Tripié" checked={isChecked.tripie} onChange={handleCheckboxChange} /> Tripié</div>
-                            <div><input type="checkbox" id="microfonos" name="microfonos" value="Microfonos" checked={isChecked.microfonos} onChange={handleCheckboxChange} /> Microfonos</div>
-                            <div><input type="checkbox" id="proyectores" name="proyectores" value="Proyectores" checked={isChecked.proyectores} onChange={handleCheckboxChange} /> Proyectores</div>
-                            <div><input type="checkbox" id="bocina" name="bocina" value="Bocina" checked={isChecked.bocina} onChange={handleCheckboxChange} /> Bocina</div>
-                            <div><input type="checkbox" id="eqconfe" name="equipoVideoconferencia" value="Equipo de Videoconferencia" checked={isChecked.eqconfe} onChange={handleCheckboxChange} /> Equipo de Videoconferencia</div>
-                            <div><input type="checkbox" id="extension" name="extension" value="Extensión" checked={isChecked.extension} onChange={handleCheckboxChange} /> Extensión</div>
-                            <div><input type="checkbox" id="laptop" name="laptop" value="Laptop" checked={isChecked.laptop} onChange={handleCheckboxChange} /> Laptop</div>
+                            <div><input type="checkbox" id="screen" name="Pantallas" value="Pantallas" checked={isChecked.screen} onChange={handleCheckboxChange} /> Pantallas</div>
+                            <div><input type="checkbox" id="tripie" name="Tripié" value="Tripié" checked={isChecked.tripie} onChange={handleCheckboxChange} /> Tripié</div>
+                            <div><input type="checkbox" id="microfonos" name="Micrófonos" value="Microfonos" checked={isChecked.microfonos} onChange={handleCheckboxChange} /> Microfonos</div>
+                            <div><input type="checkbox" id="proyectores" name="Proyectores" value="Proyectores" checked={isChecked.proyectores} onChange={handleCheckboxChange} /> Proyectores</div>
+                            <div><input type="checkbox" id="bocina" name="Bocina" value="Bocina" checked={isChecked.bocina} onChange={handleCheckboxChange} /> Bocina</div>
+                            <div><input type="checkbox" id="eqconfe" name="Equipo de Videoconferencia" value="Equipo de Videoconferencia" checked={isChecked.eqconfe} onChange={handleCheckboxChange} /> Equipo de Videoconferencia</div>
+                            <div><input type="checkbox" id="extension" name="Extension" value="Extensión" checked={isChecked.extension} onChange={handleCheckboxChange} /> Extensión</div>
+                            <div><input type="checkbox" id="laptop" name="Laptop" value="Laptop" checked={isChecked.laptop} onChange={handleCheckboxChange} /> Laptop</div>
                         </div>
                     </div>
                     <div className="num_persons">
