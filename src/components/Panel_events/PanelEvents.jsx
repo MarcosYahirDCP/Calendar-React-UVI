@@ -5,6 +5,7 @@ import { collection, addDoc, getDocs } from "firebase/firestore";
 import db from '../../firebase';
 import Card from 'react-bootstrap/Card';
 
+
 const EventPanel = ({ isOpen, selectedDate, selectedDate2, eventosEnFechaSeleccionada }) => {
     const [modalOpen, setModalOpen] = useState(false);
     const [numPonentes, setNumPonentes] = useState(1);
@@ -16,7 +17,8 @@ const EventPanel = ({ isOpen, selectedDate, selectedDate2, eventosEnFechaSelecci
         Bocina: false,
         equipoVideoconferencia: false,
         Extension: false,
-        Laptop: false
+        Laptop: false,
+        AsistenciaTécnica: false
     });
     const [eventData, setEventData] = useState({
         eventName: '',
@@ -72,6 +74,27 @@ const EventPanel = ({ isOpen, selectedDate, selectedDate2, eventosEnFechaSelecci
         });
     };
 
+    // const handleSubmit = async (event) => {
+    //     event.preventDefault();
+    //     setLoading(true); // Inicia la carga
+    //     try {
+    //         const docRef = await addDoc(collection(db, "events"), {
+    //             date: selectedDate2,
+    //             eventData
+    //         });
+    //         console.log("Document written with ID: ", docRef.id);
+    //         setLoading(false); // Finaliza la carga
+    //         setSuccessMessage(true); // Muestra el mensaje de éxito
+
+    //         setTimeout(() => {
+    //             window.location.reload(); // Recarga la página después de un tiempo determinado
+    //         }, 3000); // Cambia 3000 por el tiempo que desees mostrar el mensaje de éxito
+    //     } catch (e) {
+    //         console.error("Error adding document: ", e);
+    //         setLoading(false); // Finaliza la carga en caso de error
+    //     }
+    // };
+
     const handleSubmit = async (event) => {
         event.preventDefault();
         setLoading(true); // Inicia la carga
@@ -83,6 +106,26 @@ const EventPanel = ({ isOpen, selectedDate, selectedDate2, eventosEnFechaSelecci
             console.log("Document written with ID: ", docRef.id);
             setLoading(false); // Finaliza la carga
             setSuccessMessage(true); // Muestra el mensaje de éxito
+    
+            // Configura los detalles del correo electrónico
+            const email = "	ralanda@uv.mx";
+            const subject = "Nuevo evento añadido desde el formulario";
+            const body = `Hola,
+    
+    Se ha agendado un nuevo evento con los siguientes detalles:
+    
+    Fecha: ${selectedDate2}
+    Nombre del evento: ${eventData.eventName}
+    Lo organiza: ${eventData.eventManagerName}
+    
+    Gracias,
+    Esperamos confirmación y enviamos saludos coridiales`;
+    
+            const mailtoLink = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    
+            // Redirige al usuario al enlace de correo electrónico
+            window.location.href = mailtoLink;
+    
             setTimeout(() => {
                 window.location.reload(); // Recarga la página después de un tiempo determinado
             }, 3000); // Cambia 3000 por el tiempo que desees mostrar el mensaje de éxito
@@ -91,6 +134,9 @@ const EventPanel = ({ isOpen, selectedDate, selectedDate2, eventosEnFechaSelecci
             setLoading(false); // Finaliza la carga en caso de error
         }
     };
+    
+    
+
 
     const generateSpeakerFields = () => {
         const fields = [];
@@ -109,19 +155,19 @@ const EventPanel = ({ isOpen, selectedDate, selectedDate2, eventosEnFechaSelecci
         }
         return fields;
     };
-    
+
 
     const openModal = () => {
         setModalOpen(true);
     };
 
-    const showDetails = () =>{
+    const showDetails = () => {
     }
 
     const closeModal = () => {
         setModalOpen(false);
     };
-    
+
     return (
         <div className={`event-panel ${isOpen ? 'panelOpen' : 'panelClosed'}`}>
             <Modal isOpen={modalOpen} onClose={closeModal} onSubmit={handleSubmit}>
@@ -152,6 +198,8 @@ const EventPanel = ({ isOpen, selectedDate, selectedDate2, eventosEnFechaSelecci
                             <div><input type="checkbox" id="eqconfe" name="Equipo de Videoconferencia" value="Equipo de Videoconferencia" checked={isChecked.eqconfe} onChange={handleCheckboxChange} /> Equipo de Videoconferencia</div>
                             <div><input type="checkbox" id="extension" name="Extension" value="Extensión" checked={isChecked.extension} onChange={handleCheckboxChange} /> Extensión</div>
                             <div><input type="checkbox" id="laptop" name="Laptop" value="Laptop" checked={isChecked.laptop} onChange={handleCheckboxChange} /> Laptop</div>
+                            <div><input type="checkbox" id="asistenciaTecnica" name="Asistencia Técnica" value="Asistencia Técnica" checked={isChecked.AsistenciaTecnica} onChange={handleCheckboxChange} /> Asistencia Técnica</div>
+
                         </div>
                     </div>
                     <div className="num_persons">
