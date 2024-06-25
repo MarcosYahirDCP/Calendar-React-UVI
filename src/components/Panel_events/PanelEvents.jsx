@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './PanelEvents.css';
 import Modal from '../Modal_New_Event/ModalNewEvent';
-import { collection, addDoc} from "firebase/firestore";
+import { collection, addDoc, getDocs, getDoc, doc } from "firebase/firestore";
 import db from '../../firebase';
 import Card from 'react-bootstrap/Card';
 
@@ -28,8 +28,29 @@ const EventPanel = ({ isOpen, selectedDate, selectedDate2, eventosEnFechaSelecci
         services: [],
         speakers: []
     });
+    const [selectedSpace, setSelectedSpace] = useState(''); // Estado para almacenar el espacio seleccionado
+    const [horariosDisponibles, setHorariosDisponibles] = useState([]); // Estado para almacenar los horarios disponibles del espacio seleccionado
+    const [selectedHorarios, setSelectedHorarios] = useState([]); // Estado para almacenar los horarios seleccionados
+    const [salones, setSalones] = useState([]);
+
+    //Con esta funcion se recupera los salones
+    useEffect(() => {
+        const fetchSalones = async () => {
+            try {
+                const salonesCollection = collection(db, 'salones');
+                const snapshot = await getDocs(salonesCollection);
+                const salonesData = snapshot.docs.map(doc => doc.id);
+                setSalones(salonesData);
+            } catch (error) {
+                console.error('Error fetching salones: ', error);
+            }
+        };
+
+        fetchSalones();
+    }, []);
     const [loading, setLoading] = useState(false); // Nuevo estado para controlar la carga
     const [successMessage, setSuccessMessage] = useState(false); // Nuevo estado para mostrar el mensaje de éxito
+    
     useEffect(() => {
         const selectedServices = Object.entries(isChecked)
             .filter(([key, value]) => value)
@@ -39,7 +60,7 @@ const EventPanel = ({ isOpen, selectedDate, selectedDate2, eventosEnFechaSelecci
             services: selectedServices
         }));
     }, [isChecked]);
-    
+
 
     const handleCheckboxChange = (event) => {
         const { name, checked } = event.target;
@@ -74,6 +95,44 @@ const EventPanel = ({ isOpen, selectedDate, selectedDate2, eventosEnFechaSelecci
             speakers: updatedSpeakers,
         });
     };
+    const handleSpaceChange = async (event) => {
+        const space = event.target.value;
+        setSelectedSpace(space);
+    
+        try {
+            const docRef = doc(db, 'salones', space);
+            const docSnap = await getDoc(docRef);
+            
+            if (docSnap.exists()) {
+                const horariosData = docSnap.data();
+                const horariosDisponibles = Object.keys(horariosData)
+                    .filter(key => horariosData[key] === 'Libre')
+                    .sort((a, b) => {
+                        // Ejemplo de orden por hora (asumiendo que los horarios son strings en formato "HH:MM")
+                        return a.localeCompare(b); // Ordenar alfabéticamente, adaptar si es necesario
+                    });
+    
+                console.log(horariosDisponibles);
+                setHorariosDisponibles(horariosDisponibles);
+                setSelectedHorarios([]); // Limpiar los horarios seleccionados si es necesario
+            } else {
+                console.error('No such document!');
+            }
+        } catch (error) {
+            console.error('Error fetching horarios: ', error);
+        }
+    };
+    const handleHorarioChange = (event) => {
+        const horario = event.target.value;
+        if (selectedHorarios.includes(horario)) {
+            setSelectedHorarios(selectedHorarios.filter(item => item !== horario));
+        } else {
+            setSelectedHorarios([...selectedHorarios, horario]);
+        }
+    };
+    
+    
+    
 
     // const handleSubmit = async (event) => {
     //     event.preventDefault();
@@ -107,7 +166,7 @@ const EventPanel = ({ isOpen, selectedDate, selectedDate2, eventosEnFechaSelecci
             console.log("Document written with ID: ", docRef.id);
             setLoading(false); // Finaliza la carga
             setSuccessMessage(true); // Muestra el mensaje de éxito
-    
+
             // Configura los detalles del correo electrónico
             const email = "	ralanda@uv.mx";
             const subject = "Nuevo evento añadido desde el formulario";
@@ -121,12 +180,12 @@ const EventPanel = ({ isOpen, selectedDate, selectedDate2, eventosEnFechaSelecci
     
     Gracias,
     Esperamos confirmación y enviamos saludos coridiales`;
-    
+
             const mailtoLink = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    
+
             // Redirige al usuario al enlace de correo electrónico
             window.location.href = mailtoLink;
-    
+
             setTimeout(() => {
                 window.location.reload(); // Recarga la página después de un tiempo determinado
             }, 3000); // Cambia 3000 por el tiempo que desees mostrar el mensaje de éxito
@@ -135,8 +194,8 @@ const EventPanel = ({ isOpen, selectedDate, selectedDate2, eventosEnFechaSelecci
             setLoading(false); // Finaliza la carga en caso de error
         }
     };
-    
-    
+
+
 
 
     const generateSpeakerFields = () => {
@@ -181,13 +240,39 @@ const EventPanel = ({ isOpen, selectedDate, selectedDate2, eventosEnFechaSelecci
                     </div>
                     <div className='time_start_finish'>
                         <div className="add-event-input">
-                            <input type="text" placeholder="Hora de Inicio Estimada" className="event-time-from" name="eventTimeFrom" onChange={handleInputChange} />
+                            <input type="text" placeholder="Hora de Inicio Estimada" className="event-time-from" name="eventTimeFrom" onChange={handleInputChange} readOnly />
                         </div>
                         <div style={{ width: "30%" }}></div>
                         <div className="add-event-input">
-                            <input type="text" placeholder="Hora de Fin Estimada" className="event-time-to" name="eventTimeTo" onChange={handleInputChange} />
+                            <input type="text" placeholder="Hora de Fin Estimada" className="event-time-to" name="eventTimeTo" onChange={handleInputChange} readOnly />
                         </div>
                     </div>
+                    <div>
+                        <select value={selectedSpace} onChange={handleSpaceChange}>
+                            <option value="">Seleccione un espacio</option>
+                            {salones.map(salon => (
+                                <option key={salon} value={salon}>{salon}</option>
+                            ))}
+                        </select>
+                    </div>
+                    <div>
+    <label>Seleccione horarios disponibles:</label>
+    <div className="checklist">
+        {horariosDisponibles.map(horario => (
+            <div key={horario}>
+                <input
+                    type="checkbox"
+                    id={horario}
+                    name={horario}
+                    value={horario}
+                    checked={selectedHorarios.includes(horario)}
+                    onChange={handleHorarioChange}
+                />
+                <label htmlFor={horario}>{horario}</label>
+            </div>
+        ))}
+    </div>
+</div>
                     <div>
                         <label id='options'>De los siguientes servicios selecciona los que necesites:</label>
                         <div className="checklist">
