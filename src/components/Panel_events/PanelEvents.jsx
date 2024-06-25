@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './PanelEvents.css';
 import Modal from '../Modal_New_Event/ModalNewEvent';
-import { collection, addDoc, getDocs } from "firebase/firestore";
+import { collection, addDoc} from "firebase/firestore";
 import db from '../../firebase';
 import Card from 'react-bootstrap/Card';
 
@@ -34,11 +34,12 @@ const EventPanel = ({ isOpen, selectedDate, selectedDate2, eventosEnFechaSelecci
         const selectedServices = Object.entries(isChecked)
             .filter(([key, value]) => value)
             .map(([key, value]) => key);
-        setEventData({
-            ...eventData,
+        setEventData(prevEventData => ({
+            ...prevEventData,
             services: selectedServices
-        });
+        }));
     }, [isChecked]);
+    
 
     const handleCheckboxChange = (event) => {
         const { name, checked } = event.target;

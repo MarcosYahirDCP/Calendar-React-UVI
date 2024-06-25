@@ -1,8 +1,62 @@
-body{
+body {
     background-color: #18529d;
     margin: 3vh;
 }
-.calendar_container{
+
+.calendar_container {
     height: 94vh;
     background-color: #fff;
+}
+
+/* Estilos para el modal de advertencia */
+.warning-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.75);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.warning-modal {
+    background: white;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    outline: none;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.modal-content {
+    text-align: center;
+}
+
+.warning-icon {
+    font-size: 50px;
+    color: red;
+}
+
+.modal-content h2 {
+    margin-top: 10px;
+}
+
+.modal-content p {
+    margin: 20px 0;
+}
+
+.modal-content button {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.modal-content button:hover {
+    background-color: #0056b3;
 }

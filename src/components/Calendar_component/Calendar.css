@@ -1,74 +1,108 @@
-.bodyCalendar{
+.bodyCalendar {
     background-color: white;
     margin: 2vh;
     width: 70%;
     max-height: 90vh;
 }
-.panelsContainer{
-display: flex;
+
+.panelsContainer {
+    display: flex;
+    flex-direction: row;
 }
+
 /* Estilo para cambiar la fecha del dia de hoy */
 .fc-day-today {
     background: rgba(40, 173, 86, 0.5) !important;
     border: none !important;
-} 
-button.fc-today-button.fc-button.fc-button-primary{
+}
+
+button.fc-today-button.fc-button.fc-button-primary {
     background-color: #18529d;
     border: none;
 }
-button.fc-today-button.fc-button.fc-button-primary:hover{
+
+button.fc-today-button.fc-button.fc-button-primary:hover {
     background-color: #28AD56;
     border: none;
 }
-button.fc-today-button.fc-button.fc-button-primary{
+
+button.fc-today-button.fc-button.fc-button-primary {
     background-color: #18529d;
 }
+
 /* Botones del menu superior */
 button.fc-dayGridMonth-button.fc-button.fc-button-primary {
     background-color: #18529d !important;
     border: none;
 }
+
 button.fc-dayGridMonth-button.fc-button.fc-button-primary:hover {
     background-color: #28AD56 !important;
     border: none;
 }
+
 button.fc-timeGridWeek-button.fc-button.fc-button-primary {
     background-color: #18529d !important;
     border: none;
 }
+
 button.fc-timeGridWeek-button.fc-button.fc-button-primary:hover {
     background-color: #28AD56 !important;
     border: none;
 }
+
 button.fc-timeGridDay-button.fc-button.fc-button-primary {
     background-color: #18529d !important;
     border: none;
 }
+
 button.fc-timeGridDay-button.fc-button.fc-button-primary:hover {
     background-color: #28AD56 !important;
     border: none;
 }
+
 button.fc-next-button.fc-button.fc-button-primary {
     background-color: #18529d !important;
     border: none;
 }
-button.fc-next-button.fc-button.fc-button-primary:hover{
+
+button.fc-next-button.fc-button.fc-button-primary:hover {
     background-color: #28AD56 !important;
     border: none;
 }
+
 button.fc-prev-button.fc-button.fc-button-primary {
     background-color: #18529d !important;
     border: none;
 }
+
 button.fc-prev-button.fc-button.fc-button-primary:hover {
     background-color: #28AD56 !important;
     border: none;
 }
-.fc-event-title-container{
+
+.fc-event-title-container {
     padding: 5px;
     background-color: #18529d;
 }
-.fc-daygrid-event-harness{
+
+.fc-daygrid-event-harness {
     margin-bottom: 10px;
     font-size: 18pt;
+}
+
+@media (max-width: 768px) {
+    .panelsContainer {
+        flex-direction: column;
+    }
+
+    .bodyCalendar {
+        width: 100%;
+        margin: 0;
+        max-height: none;
+    }
+
+    .calendar_container {
+        width: 100%;
+    }
 }
