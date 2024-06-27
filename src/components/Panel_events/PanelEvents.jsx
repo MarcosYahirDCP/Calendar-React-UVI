@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './PanelEvents.css';
 import Modal from '../Modal_New_Event/ModalNewEvent';
-import { collection, addDoc, getDocs, getDoc, doc } from "firebase/firestore";
+import { collection, addDoc, getDocs} from "firebase/firestore";
 import { query, where} from 'firebase/firestore';
 import db from '../../firebase';
 import Card from 'react-bootstrap/Card';
