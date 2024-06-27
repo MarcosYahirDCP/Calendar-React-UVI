@@ -32,7 +32,14 @@ const EventPanel = ({ isOpen, selectedDate, selectedDate2, eventosEnFechaSelecci
     const [horariosDisponibles, setHorariosDisponibles] = useState([]); // Estado para almacenar los horarios disponibles del espacio seleccionado
     const [selectedHorarios, setSelectedHorarios] = useState([]); // Estado para almacenar los horarios seleccionados
     const [salones, setSalones] = useState([]);
+    useEffect(() => {
+        const fetchSalones = async () => {
+            // No es necesario consultar Firebase para los salones estáticos definidos arriba
+            setSalones(['Salon 1', 'Auditorio', 'Aula Híbrida']);
+        };
 
+        fetchSalones();
+    }, []);
     //Con esta funcion se recupera los salones
     useEffect(() => {
         const fetchSalones = async () => {
@@ -50,7 +57,7 @@ const EventPanel = ({ isOpen, selectedDate, selectedDate2, eventosEnFechaSelecci
     }, []);
     const [loading, setLoading] = useState(false); // Nuevo estado para controlar la carga
     const [successMessage, setSuccessMessage] = useState(false); // Nuevo estado para mostrar el mensaje de éxito
-    
+
     useEffect(() => {
         const selectedServices = Object.entries(isChecked)
             .filter(([key, value]) => value)
@@ -99,25 +106,22 @@ const EventPanel = ({ isOpen, selectedDate, selectedDate2, eventosEnFechaSelecci
         const space = event.target.value;
         setSelectedSpace(space);
     
-        try {
-            const docRef = doc(db, 'salones', space);
-            const docSnap = await getDoc(docRef);
-            
-            if (docSnap.exists()) {
-                const horariosData = docSnap.data();
-                const horariosDisponibles = Object.keys(horariosData)
-                    .filter(key => horariosData[key] === 'Libre')
-                    .sort((a, b) => {
-                        // Ejemplo de orden por hora (asumiendo que los horarios son strings en formato "HH:MM")
-                        return a.localeCompare(b); // Ordenar alfabéticamente, adaptar si es necesario
-                    });
+        // Generar horarios de ejemplo (de 8:00 a 20:59 con intervalo de 1 hora)
+        const horarios = [];
+        let hora = 8;
+        while (hora <= 20) {
+            const horaInicio = hora.toString().padStart(2, '0');
+            const horaFin = hora.toString().padStart(2, '0');
+            horarios.push(`${horaInicio}:00 - ${horaFin}:59`);
+            hora++;
+        }
+        setHorariosDisponibles(horarios);
     
-                console.log(horariosDisponibles);
-                setHorariosDisponibles(horariosDisponibles);
-                setSelectedHorarios([]); // Limpiar los horarios seleccionados si es necesario
-            } else {
-                console.error('No such document!');
-            }
+        // Lógica para verificar conflictos con eventos en Firestore
+        try {
+            // Aquí debes implementar la lógica para verificar si hay eventos registrados en Firestore
+            // para el espacio seleccionado y la fecha seleccionada (selectedDate2)
+            // y filtrar los horarios disponibles en base a eso
         } catch (error) {
             console.error('Error fetching horarios: ', error);
         }
@@ -130,9 +134,9 @@ const EventPanel = ({ isOpen, selectedDate, selectedDate2, eventosEnFechaSelecci
             setSelectedHorarios([...selectedHorarios, horario]);
         }
     };
-    
-    
-    
+
+
+
 
     // const handleSubmit = async (event) => {
     //     event.preventDefault();
@@ -155,47 +159,84 @@ const EventPanel = ({ isOpen, selectedDate, selectedDate2, eventosEnFechaSelecci
     //     }
     // };
 
+    // const handleSubmit = async (event) => {
+    //     event.preventDefault();
+    //     setLoading(true); // Inicia la carga
+    //     try {
+    //         const docRef = await addDoc(collection(db, "events"), {
+    //             date: selectedDate2,
+    //             eventData
+    //         });
+    //         console.log("Document written with ID: ", docRef.id);
+    //         setLoading(false); // Finaliza la carga
+    //         setSuccessMessage(true); // Muestra el mensaje de éxito
+
+    //         // Configura los detalles del correo electrónico
+    //         const email = "	ralanda@uv.mx";
+    //         const subject = "Nuevo evento añadido desde el formulario";
+    //         const body = `Hola,
+    
+    // Se ha agendado un nuevo evento con los siguientes detalles:
+    
+    // Fecha: ${selectedDate2}
+    // Nombre del evento: ${eventData.eventName}
+    // Lo organiza: ${eventData.eventManagerName}
+    
+    // Gracias,
+    // Esperamos confirmación y enviamos saludos coridiales`;
+
+    //         const mailtoLink = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
+    //         // Redirige al usuario al enlace de correo electrónico
+    //         window.location.href = mailtoLink;
+
+    //         setTimeout(() => {
+    //             window.location.reload(); // Recarga la página después de un tiempo determinado
+    //         }, 3000); // Cambia 3000 por el tiempo que desees mostrar el mensaje de éxito
+    //     } catch (e) {
+    //         console.error("Error adding document: ", e);
+    //         setLoading(false); // Finaliza la carga en caso de error
+    //     }
+    // };
     const handleSubmit = async (event) => {
         event.preventDefault();
-        setLoading(true); // Inicia la carga
+        setLoading(true);
+    
         try {
+            // Ordenar los horarios seleccionados para asegurarse de obtener el primero y el último correctamente
+            const sortedHorarios = selectedHorarios.sort();
+    
+            // Obtener el horario más temprano (eventTimeFrom) antes del guion del primer intervalo
+            const eventTimeFrom = sortedHorarios[0].split(' - ')[0];
+    
+            // Obtener el horario más tardío (eventTimeTo) después del guion del último intervalo
+            const eventTimeTo = sortedHorarios[selectedHorarios.length - 1].split(' - ')[1];
+    
+            // Guardar los datos del evento en Firestore
             const docRef = await addDoc(collection(db, "events"), {
                 date: selectedDate2,
-                eventData
+                eventData: {
+                    ...eventData,
+                    selectedHorarios: selectedHorarios,
+                    selectedSpace: selectedSpace,
+                    eventTimeFrom: eventTimeFrom,
+                    eventTimeTo: eventTimeTo
+                },
             });
-            console.log("Document written with ID: ", docRef.id);
-            setLoading(false); // Finaliza la carga
-            setSuccessMessage(true); // Muestra el mensaje de éxito
-
-            // Configura los detalles del correo electrónico
-            const email = "	ralanda@uv.mx";
-            const subject = "Nuevo evento añadido desde el formulario";
-            const body = `Hola,
     
-    Se ha agendado un nuevo evento con los siguientes detalles:
+            console.log("Documento creado con ID: ", docRef.id);
+            setLoading(false);
+            setSuccessMessage(true);
     
-    Fecha: ${selectedDate2}
-    Nombre del evento: ${eventData.eventName}
-    Lo organiza: ${eventData.eventManagerName}
-    
-    Gracias,
-    Esperamos confirmación y enviamos saludos coridiales`;
-
-            const mailtoLink = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-
-            // Redirige al usuario al enlace de correo electrónico
-            window.location.href = mailtoLink;
-
+            // Restaurar la página después de un tiempo
             setTimeout(() => {
-                window.location.reload(); // Recarga la página después de un tiempo determinado
-            }, 3000); // Cambia 3000 por el tiempo que desees mostrar el mensaje de éxito
-        } catch (e) {
-            console.error("Error adding document: ", e);
-            setLoading(false); // Finaliza la carga en caso de error
+                window.location.reload();
+            }, 3000);
+        } catch (error) {
+            console.error("Error al agregar documento: ", error);
+            setLoading(false);
         }
     };
-
-
 
 
     const generateSpeakerFields = () => {
@@ -248,31 +289,31 @@ const EventPanel = ({ isOpen, selectedDate, selectedDate2, eventosEnFechaSelecci
                         </div>
                     </div>
                     <div>
-                        <select value={selectedSpace} onChange={handleSpaceChange}>
+                    <select value={selectedSpace} onChange={handleSpaceChange}>
                             <option value="">Seleccione un espacio</option>
-                            {salones.map(salon => (
-                                <option key={salon} value={salon}>{salon}</option>
+                            {salones.map((salon, index) => (
+                                <option key={index} value={salon}>{salon}</option>
                             ))}
                         </select>
                     </div>
                     <div>
-    <label>Seleccione horarios disponibles:</label>
-    <div className="checklist">
-        {horariosDisponibles.map(horario => (
-            <div key={horario}>
-                <input
-                    type="checkbox"
-                    id={horario}
-                    name={horario}
-                    value={horario}
-                    checked={selectedHorarios.includes(horario)}
-                    onChange={handleHorarioChange}
-                />
-                <label htmlFor={horario}>{horario}</label>
-            </div>
-        ))}
-    </div>
-</div>
+                        <label>Seleccione horarios disponibles:</label>
+                        <div className="checklist">
+                            {horariosDisponibles.map(horario => (
+                                <div key={horario}>
+                                    <input
+                                        type="checkbox"
+                                        id={horario}
+                                        name={horario}
+                                        value={horario}
+                                        checked={selectedHorarios.includes(horario)}
+                                        onChange={handleHorarioChange}
+                                    />
+                                    <label htmlFor={horario}>{horario}</label>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
                     <div>
                         <label id='options'>De los siguientes servicios selecciona los que necesites:</label>
                         <div className="checklist">
