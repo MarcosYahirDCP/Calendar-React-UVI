@@ -268,7 +268,9 @@ const EventPanel = ({ isOpen, selectedDate, selectedDate2, eventosEnFechaSelecci
                     </div>
                     <div className="add-event-input">
                         <input type="text" placeholder="Nombre Del Encargado del Evento" className="event-manager-name" name="eventManagerName" onChange={handleInputChange} />
+                        <input type="text" placeholder="Email@example.com" className="event-manager-name" name="email" onChange={handleInputChange} />
                     </div>
+                    
                     <div style={{ display:'none' }} className='time_start_finish'>
                         <div className="add-event-input">
                             <input type="text" placeholder="Hora de Inicio Estimada" className="event-time-from" name="eventTimeFrom" onChange={handleInputChange} readOnly />
