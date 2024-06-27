@@ -12,6 +12,13 @@
     font-size: larger;
     box-sizing: border-box; /* Para que el padding no afecte el tamaño total */
 }
+.combobox{
+
+}
+.titulo-container{
+    color: #18529d;
+    margin-top: 25pt;
+}
 
 #selected_date {
     width: 100%;

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './PanelEvents.css';
 import Modal from '../Modal_New_Event/ModalNewEvent';
 import { collection, addDoc, getDocs, getDoc, doc } from "firebase/firestore";
+import { query, where} from 'firebase/firestore';
 import db from '../../firebase';
 import Card from 'react-bootstrap/Card';
 
@@ -104,6 +105,14 @@ const EventPanel = ({ isOpen, selectedDate, selectedDate2, eventosEnFechaSelecci
     };
     const handleSpaceChange = async (event) => {
         const space = event.target.value;
+        if (space === '') {
+            // Si se selecciona la opción 'Seleccione un espacio', limpiar los horarios disponibles
+            setHorariosDisponibles([]);
+            setSelectedSpace('');
+            setSelectedHorarios([]);
+            return;
+        }
+    
         setSelectedSpace(space);
     
         // Generar horarios de ejemplo (de 8:00 a 20:59 con intervalo de 1 hora)
@@ -115,15 +124,30 @@ const EventPanel = ({ isOpen, selectedDate, selectedDate2, eventosEnFechaSelecci
             horarios.push(`${horaInicio}:00 - ${horaFin}:59`);
             hora++;
         }
-        setHorariosDisponibles(horarios);
     
-        // Lógica para verificar conflictos con eventos en Firestore
         try {
-            // Aquí debes implementar la lógica para verificar si hay eventos registrados en Firestore
-            // para el espacio seleccionado y la fecha seleccionada (selectedDate2)
-            // y filtrar los horarios disponibles en base a eso
+            // Consultar eventos en Firestore para el espacio y fecha seleccionados
+            const eventsCollection = collection(db, 'events');
+            const q = query(eventsCollection,
+                where(`eventData.selectedSpace`, '==', space),
+                where('date', '==', selectedDate2)
+            );
+            const querySnapshot = await getDocs(q);
+    
+            // Obtener los horarios ocupados de los eventos en Firestore
+            let selectedHorariosFirestore = [];
+            querySnapshot.forEach((doc) => {
+                const eventData = doc.data().eventData;
+                selectedHorariosFirestore = selectedHorariosFirestore.concat(eventData.selectedHorarios);
+            });
+    
+            // Filtrar los horarios disponibles para mostrar en la checklist
+            const horariosDisponiblesFiltrados = horarios.filter(horario => !selectedHorariosFirestore.includes(horario));
+    
+            // Actualizar el estado de horariosDisponibles con los horarios filtrados
+            setHorariosDisponibles(horariosDisponiblesFiltrados);
         } catch (error) {
-            console.error('Error fetching horarios: ', error);
+            console.error('Error fetching events from Firestore: ', error);
         }
     };
     const handleHorarioChange = (event) => {
@@ -135,69 +159,6 @@ const EventPanel = ({ isOpen, selectedDate, selectedDate2, eventosEnFechaSelecci
         }
     };
 
-
-
-
-    // const handleSubmit = async (event) => {
-    //     event.preventDefault();
-    //     setLoading(true); // Inicia la carga
-    //     try {
-    //         const docRef = await addDoc(collection(db, "events"), {
-    //             date: selectedDate2,
-    //             eventData
-    //         });
-    //         console.log("Document written with ID: ", docRef.id);
-    //         setLoading(false); // Finaliza la carga
-    //         setSuccessMessage(true); // Muestra el mensaje de éxito
-
-    //         setTimeout(() => {
-    //             window.location.reload(); // Recarga la página después de un tiempo determinado
-    //         }, 3000); // Cambia 3000 por el tiempo que desees mostrar el mensaje de éxito
-    //     } catch (e) {
-    //         console.error("Error adding document: ", e);
-    //         setLoading(false); // Finaliza la carga en caso de error
-    //     }
-    // };
-
-    // const handleSubmit = async (event) => {
-    //     event.preventDefault();
-    //     setLoading(true); // Inicia la carga
-    //     try {
-    //         const docRef = await addDoc(collection(db, "events"), {
-    //             date: selectedDate2,
-    //             eventData
-    //         });
-    //         console.log("Document written with ID: ", docRef.id);
-    //         setLoading(false); // Finaliza la carga
-    //         setSuccessMessage(true); // Muestra el mensaje de éxito
-
-    //         // Configura los detalles del correo electrónico
-    //         const email = "	ralanda@uv.mx";
-    //         const subject = "Nuevo evento añadido desde el formulario";
-    //         const body = `Hola,
-    
-    // Se ha agendado un nuevo evento con los siguientes detalles:
-    
-    // Fecha: ${selectedDate2}
-    // Nombre del evento: ${eventData.eventName}
-    // Lo organiza: ${eventData.eventManagerName}
-    
-    // Gracias,
-    // Esperamos confirmación y enviamos saludos coridiales`;
-
-    //         const mailtoLink = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-
-    //         // Redirige al usuario al enlace de correo electrónico
-    //         window.location.href = mailtoLink;
-
-    //         setTimeout(() => {
-    //             window.location.reload(); // Recarga la página después de un tiempo determinado
-    //         }, 3000); // Cambia 3000 por el tiempo que desees mostrar el mensaje de éxito
-    //     } catch (e) {
-    //         console.error("Error adding document: ", e);
-    //         setLoading(false); // Finaliza la carga en caso de error
-    //     }
-    // };
     const handleSubmit = async (event) => {
         event.preventDefault();
         setLoading(true);
@@ -237,7 +198,30 @@ const EventPanel = ({ isOpen, selectedDate, selectedDate2, eventosEnFechaSelecci
             setLoading(false);
         }
     };
-
+    const resetForm = () => {
+        setIsChecked({
+            Pantallas: false,
+            Tripie: false,
+            Micrófonos: false,
+            Proyectores: false,
+            Bocina: false,
+            equipoVideoconferencia: false,
+            Extension: false,
+            Laptop: false,
+            AsistenciaTécnica: false
+        });
+        setEventData({
+            eventName: '',
+            eventManagerName: '',
+            eventTimeFrom: '',
+            eventTimeTo: '',
+            services: [],
+            speakers: []
+        });
+        setSelectedSpace('');
+        setSelectedHorarios([]);
+        setSuccessMessage(false);
+    };
 
     const generateSpeakerFields = () => {
         const fields = [];
@@ -260,6 +244,10 @@ const EventPanel = ({ isOpen, selectedDate, selectedDate2, eventosEnFechaSelecci
 
     const openModal = () => {
         setModalOpen(true);
+        setModalOpen(true);
+        setHorariosDisponibles([]);
+        setSelectedSpace('');
+        setSelectedHorarios([]);
     };
 
     const showDetails = () => {
@@ -267,6 +255,8 @@ const EventPanel = ({ isOpen, selectedDate, selectedDate2, eventosEnFechaSelecci
 
     const closeModal = () => {
         setModalOpen(false);
+        resetForm(); // Restablecer el formulario al cerrar el modal
+
     };
 
     return (
@@ -279,7 +269,7 @@ const EventPanel = ({ isOpen, selectedDate, selectedDate2, eventosEnFechaSelecci
                     <div className="add-event-input">
                         <input type="text" placeholder="Nombre Del Encargado del Evento" className="event-manager-name" name="eventManagerName" onChange={handleInputChange} />
                     </div>
-                    <div className='time_start_finish'>
+                    <div style={{ display:'none' }} className='time_start_finish'>
                         <div className="add-event-input">
                             <input type="text" placeholder="Hora de Inicio Estimada" className="event-time-from" name="eventTimeFrom" onChange={handleInputChange} readOnly />
                         </div>
@@ -296,8 +286,8 @@ const EventPanel = ({ isOpen, selectedDate, selectedDate2, eventosEnFechaSelecci
                             ))}
                         </select>
                     </div>
-                    <div>
-                        <label>Seleccione horarios disponibles:</label>
+                    <div className='titulo-container'>
+                        <label className='titulo'>Seleccione horarios disponibles:</label>
                         <div className="checklist">
                             {horariosDisponibles.map(horario => (
                                 <div key={horario}>
