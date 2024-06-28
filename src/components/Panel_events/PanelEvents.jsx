@@ -369,6 +369,8 @@ const EventPanel = ({ isOpen, selectedDate, selectedDate2, eventosEnFechaSelecci
                                 <Card.Body>
                                     <Card.Title>{evento.title}</Card.Title>
                                     <Card.Text>Horario: {evento.extendedProps.timeStart} - {evento.extendedProps.timeEnd}</Card.Text>
+                                    <Card.Text>Lugar: {evento.extendedProps.place}</Card.Text>
+
                                 </Card.Body>
                             </Card>
                         ))}

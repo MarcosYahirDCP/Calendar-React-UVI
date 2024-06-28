@@ -67,7 +67,8 @@ function Calendar() {
                     extendedProps: {
                         eventManager: documento.eventData.eventManagerName,
                         timeStart: documento.eventData.eventTimeFrom,
-                        timeEnd: documento.eventData.eventTimeTo
+                        timeEnd: documento.eventData.eventTimeTo,
+                        place: documento.eventData.selectedSpace
                     },
                 }));
                 console.log(eventos)
