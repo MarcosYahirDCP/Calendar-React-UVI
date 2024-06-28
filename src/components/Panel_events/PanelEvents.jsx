@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import './PanelEvents.css';
 import Modal from '../Modal_New_Event/ModalNewEvent';
-import { collection, addDoc, getDocs} from "firebase/firestore";
-import { query, where} from 'firebase/firestore';
+import { collection, addDoc, getDocs } from "firebase/firestore";
+import { query, where } from 'firebase/firestore';
 import db from '../../firebase';
 import Card from 'react-bootstrap/Card';
+import emailjs from '@emailjs/browser';
+
 
 
 const EventPanel = ({ isOpen, selectedDate, selectedDate2, eventosEnFechaSeleccionada }) => {
@@ -103,6 +105,8 @@ const EventPanel = ({ isOpen, selectedDate, selectedDate2, eventosEnFechaSelecci
             speakers: updatedSpeakers,
         });
     };
+
+
     const handleSpaceChange = async (event) => {
         const space = event.target.value;
         if (space === '') {
@@ -112,9 +116,9 @@ const EventPanel = ({ isOpen, selectedDate, selectedDate2, eventosEnFechaSelecci
             setSelectedHorarios([]);
             return;
         }
-    
+
         setSelectedSpace(space);
-    
+
         // Generar horarios de ejemplo (de 8:00 a 20:59 con intervalo de 1 hora)
         const horarios = [];
         let hora = 8;
@@ -124,7 +128,7 @@ const EventPanel = ({ isOpen, selectedDate, selectedDate2, eventosEnFechaSelecci
             horarios.push(`${horaInicio}:00 - ${horaFin}:59`);
             hora++;
         }
-    
+
         try {
             // Consultar eventos en Firestore para el espacio y fecha seleccionados
             const eventsCollection = collection(db, 'events');
@@ -133,17 +137,17 @@ const EventPanel = ({ isOpen, selectedDate, selectedDate2, eventosEnFechaSelecci
                 where('date', '==', selectedDate2)
             );
             const querySnapshot = await getDocs(q);
-    
+
             // Obtener los horarios ocupados de los eventos en Firestore
             let selectedHorariosFirestore = [];
             querySnapshot.forEach((doc) => {
                 const eventData = doc.data().eventData;
                 selectedHorariosFirestore = selectedHorariosFirestore.concat(eventData.selectedHorarios);
             });
-    
+
             // Filtrar los horarios disponibles para mostrar en la checklist
             const horariosDisponiblesFiltrados = horarios.filter(horario => !selectedHorariosFirestore.includes(horario));
-    
+
             // Actualizar el estado de horariosDisponibles con los horarios filtrados
             setHorariosDisponibles(horariosDisponiblesFiltrados);
         } catch (error) {
@@ -162,17 +166,17 @@ const EventPanel = ({ isOpen, selectedDate, selectedDate2, eventosEnFechaSelecci
     const handleSubmit = async (event) => {
         event.preventDefault();
         setLoading(true);
-    
+
         try {
             // Ordenar los horarios seleccionados para asegurarse de obtener el primero y el último correctamente
             const sortedHorarios = selectedHorarios.sort();
-    
+
             // Obtener el horario más temprano (eventTimeFrom) antes del guion del primer intervalo
             const eventTimeFrom = sortedHorarios[0].split(' - ')[0];
-    
+
             // Obtener el horario más tardío (eventTimeTo) después del guion del último intervalo
             const eventTimeTo = sortedHorarios[selectedHorarios.length - 1].split(' - ')[1];
-    
+
             // Guardar los datos del evento en Firestore
             const docRef = await addDoc(collection(db, "events"), {
                 date: selectedDate2,
@@ -184,11 +188,27 @@ const EventPanel = ({ isOpen, selectedDate, selectedDate2, eventosEnFechaSelecci
                     eventTimeTo: eventTimeTo
                 },
             });
-    
+            // Enviar el correo electrónico usando EmailJS
+            const templateParams = {
+                selectedDate2: selectedDate2,
+                eventName: eventData.eventName, // Asegúrate de que eventName esté en eventData
+                eventManagerName: eventData.eventManagerName, // Asegúrate de que eventManagerName esté en eventData
+            };
+
+            emailjs.send('service_mwvoss9', 'template_j7kw3s2', templateParams, 'GJn-sdnYOhmMJ52vy')
+                .then((response) => {
+                    console.log('SUCCESS!', response.status, response.text);
+                    alert('Correo enviado exitosamente');
+                }, (error) => {
+                    console.log('FAILED...', error);
+                    alert('Error al enviar el correo');
+                });
+
+
             console.log("Documento creado con ID: ", docRef.id);
             setLoading(false);
             setSuccessMessage(true);
-    
+
             // Restaurar la página después de un tiempo
             setTimeout(() => {
                 window.location.reload();
@@ -270,8 +290,8 @@ const EventPanel = ({ isOpen, selectedDate, selectedDate2, eventosEnFechaSelecci
                         <input type="text" placeholder="Nombre Del Encargado del Evento" className="event-manager-name" name="eventManagerName" onChange={handleInputChange} />
                         <input type="text" placeholder="Email@example.com" className="event-manager-name" name="email" onChange={handleInputChange} />
                     </div>
-                    
-                    <div style={{ display:'none' }} className='time_start_finish'>
+
+                    <div style={{ display: 'none' }} className='time_start_finish'>
                         <div className="add-event-input">
                             <input type="text" placeholder="Hora de Inicio Estimada" className="event-time-from" name="eventTimeFrom" onChange={handleInputChange} readOnly />
                         </div>
@@ -281,7 +301,7 @@ const EventPanel = ({ isOpen, selectedDate, selectedDate2, eventosEnFechaSelecci
                         </div>
                     </div>
                     <div>
-                    <select value={selectedSpace} onChange={handleSpaceChange}>
+                        <select value={selectedSpace} onChange={handleSpaceChange}>
                             <option value="">Seleccione un espacio</option>
                             {salones.map((salon, index) => (
                                 <option key={index} value={salon}>{salon}</option>
