@@ -35,6 +35,7 @@ const EventPanel = ({ isOpen, selectedDate, selectedDate2, eventosEnFechaSelecci
     const [horariosDisponibles, setHorariosDisponibles] = useState([]); // Estado para almacenar los horarios disponibles del espacio seleccionado
     const [selectedHorarios, setSelectedHorarios] = useState([]); // Estado para almacenar los horarios seleccionados
     const [salones, setSalones] = useState([]);
+
     useEffect(() => {
         const fetchSalones = async () => {
             // No es necesario consultar Firebase para los salones estáticos definidos arriba
@@ -58,9 +59,10 @@ const EventPanel = ({ isOpen, selectedDate, selectedDate2, eventosEnFechaSelecci
 
         fetchSalones();
     }, []);
-    const [loading, setLoading] = useState(false); // Nuevo estado para controlar la carga
-    const [successMessage, setSuccessMessage] = useState(false); // Nuevo estado para mostrar el mensaje de éxito
-
+    const [setLoading] = useState(false); // Nuevo estado para controlar la carga
+    const [loadingModalVisible, setLoadingModalVisible] = useState(false);
+    const [successModalVisible, setSuccessModalVisible] = useState(false);
+    const [errorModalVisible, setErrorModalVisible] = useState(false);
     useEffect(() => {
         const selectedServices = Object.entries(isChecked)
             .filter(([key, value]) => value)
@@ -167,7 +169,10 @@ const EventPanel = ({ isOpen, selectedDate, selectedDate2, eventosEnFechaSelecci
         event.preventDefault();
         setLoading(true);
 
+
         try {
+            setLoadingModalVisible(true);
+
             // Ordenar los horarios seleccionados para asegurarse de obtener el primero y el último correctamente
             const sortedHorarios = selectedHorarios.sort();
 
@@ -203,11 +208,17 @@ const EventPanel = ({ isOpen, selectedDate, selectedDate2, eventosEnFechaSelecci
                     console.log('FAILED...', error);
                     alert('Error al enviar el correo');
                 });
-
-
             console.log("Documento creado con ID: ", docRef.id);
+
+            setTimeout(() => {
+                setLoadingModalVisible(false);
+                setSuccessModalVisible(true); // Mostrar modal de éxito después de ocultar el modal de carga
+            }, 2000);
             setLoading(false);
-            setSuccessMessage(true);
+            setLoadingModalVisible(false);
+
+            setSuccessModalVisible(true);
+
 
             // Restaurar la página después de un tiempo
             setTimeout(() => {
@@ -216,6 +227,10 @@ const EventPanel = ({ isOpen, selectedDate, selectedDate2, eventosEnFechaSelecci
         } catch (error) {
             console.error("Error al agregar documento: ", error);
             setLoading(false);
+            setErrorModalVisible(true);
+            setLoadingModalVisible(false);
+
+
         }
     };
     const resetForm = () => {
@@ -240,7 +255,6 @@ const EventPanel = ({ isOpen, selectedDate, selectedDate2, eventosEnFechaSelecci
         });
         setSelectedSpace('');
         setSelectedHorarios([]);
-        setSuccessMessage(false);
     };
 
     const generateSpeakerFields = () => {
@@ -354,8 +368,30 @@ const EventPanel = ({ isOpen, selectedDate, selectedDate2, eventosEnFechaSelecci
                         {generateSpeakerFields()}
                     </div>
                 </form>
-                {loading && <div className="loading-screen">Guardando Evento...</div>} {/* Muestra la pantalla de carga si loading es true */}
-                {successMessage && <div className="success-message">¡El evento se ha guardado correctamente!</div>} {/* Muestra el mensaje de éxito si successMessage es true */}
+
+                <Modal isOpen={successModalVisible} onClose={() => setSuccessModalVisible(false)}>
+                    <div className="success-modal">
+                        <h2>¡Evento Agregado!</h2>
+                        <p>El evento se ha guardado correctamente.</p>
+                        <button onClick={() => {
+                            setSuccessModalVisible(false);
+                            window.location.reload(); // Recargar la página después de cerrar el modal de éxito
+                        }}>Aceptar</button>
+                    </div>
+                </Modal>
+                <Modal isOpen={errorModalVisible} onClose={() => setErrorModalVisible(false)}>
+                    <div className="error-modal">
+                        <h2>Error al Agregar Evento</h2>
+                        <p>Ocurrió un error al intentar guardar el evento. Por favor, inténtalo de nuevo más tarde.</p>
+                        <button onClick={() => setErrorModalVisible(false)}>Aceptar</button>
+                    </div>
+                </Modal>
+                {loadingModalVisible && (
+                    <div className="loading-modal">
+                        <h2>Guardando Evento...</h2>
+                        <div className="spinner"></div>
+                    </div>
+                )}
             </Modal>
             <div id='selected_date'>{selectedDate}</div>
             <div id='registered_events'>Eventos Registrados</div>
