@@ -59,7 +59,7 @@ const EventPanel = ({ isOpen, selectedDate, selectedDate2, eventosEnFechaSelecci
 
         fetchSalones();
     }, []);
-    const [setLoading] = useState(false); // Nuevo estado para controlar la carga
+    const [loading, setLoading] = useState(false); // ✅ Correct
     const [loadingModalVisible, setLoadingModalVisible] = useState(false);
     const [successModalVisible, setSuccessModalVisible] = useState(false);
     const [errorModalVisible, setErrorModalVisible] = useState(false);

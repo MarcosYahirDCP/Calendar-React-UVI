@@ -2,7 +2,7 @@ import React from 'react';
 import './Modal.css';
 
 const Modal = ({ isOpen, onClose, onSubmit, children }) => {
-
+    //En esta seccion va el código relacionado con la interaccion de los componentes en javascript
     return (
         isOpen && (
             <div className="modal-overlay">
